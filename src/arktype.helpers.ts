@@ -49,13 +49,58 @@ function arkTypeToApiMetadata(arktype: Type): Record<string, any> {
   const metadata: Record<string, any> = {};
   
   for (const [key, value] of Object.entries(properties)) {
+    const propSchema = normalizeNullableSchema(value as any);
     metadata[key] = {
-      ...(value as any),
+      ...propSchema,
       required: required.includes(key),
     };
   }
 
   return metadata;
+}
+
+/**
+ * anyOf形式のnullableスキーマをOpenAPI 3.0互換形式に変換
+ * { anyOf: [{ type: "string" }, { type: "null" }] } 
+ * → { type: "string", nullable: true }
+ */
+function normalizeNullableSchema(schema: any): any {
+  // anyOfがなければそのまま返す
+  if (!schema.anyOf || !Array.isArray(schema.anyOf)) {
+    return schema;
+  }
+
+  // anyOfの中にtype: "null"があるかチェック
+  const hasNull = schema.anyOf.some((s: any) => s.type === 'null');
+  if (!hasNull) {
+    return schema; // nullableではないanyOfはそのまま
+  }
+
+  // nullでない型を抽出
+  const nonNullSchemas = schema.anyOf.filter((s: any) => s.type !== 'null');
+
+  if (nonNullSchemas.length === 0) {
+    // すべてnullの場合
+    return { type: 'null' };
+  }
+
+  if (nonNullSchemas.length === 1) {
+    // 単一の型 + null の場合（最も一般的）
+    // { anyOf: [{ type: "string" }, { type: "null" }] } 
+    // → { type: "string", nullable: true }
+    return {
+      ...nonNullSchemas[0],
+      nullable: true,
+    };
+  }
+
+  // 複数の型 + null の場合
+  // { anyOf: [{ type: "string" }, { type: "number" }, { type: "null" }] }
+  // → { anyOf: [{ type: "string" }, { type: "number" }], nullable: true }
+  return {
+    anyOf: nonNullSchemas,
+    nullable: true,
+  };
 }
 
 /**

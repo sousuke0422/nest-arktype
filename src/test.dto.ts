@@ -31,11 +31,19 @@ export class CreateProductDto extends createArkTypeDto(ProductSchema) {}
 const ComplexSchemaDefinition = type({
   status: "'active' | 'inactive' | 'pending'",
   'tags?': 'string[]',
-  metadata: 'string | null',
   count: 'number>=0',
 });
 
 export class ComplexDto extends createArkTypeDto(ComplexSchemaDefinition) {}
+
+// テスト5: Nullable型のテスト（union with null）
+const NullableSchemaDefinition = type({
+  name: 'string',
+  'description?': 'string | null', // オプショナルかつnullable
+  metadata: 'string | null', // 必須だがnullable
+});
+
+export class NullableDto extends createArkTypeDto(NullableSchemaDefinition) {}
 
 // テスト4: Date型の処理（HTTP経由では文字列で送られる）
 const EventSchemaDefinition = type({
