@@ -16,19 +16,25 @@ export interface PropertyMetadata {
 
 /**
  * スキーマ全体のメタデータ定義
+ * 型パラメータTKeysでプロパティ名を型安全にする
  */
-export interface SchemaMetadata {
+export interface SchemaMetadata<TKeys extends string = string> {
   description?: string;
   example?: any;
-  properties?: Record<string, PropertyMetadata>;
+  properties?: Partial<Record<TKeys, PropertyMetadata>>;
 }
 
 /**
  * ArkTypeの型にメタデータを付与するための内部型
  */
 type ArkTypeWithMeta<T extends Type> = T & { 
-  __meta?: SchemaMetadata;
+  __meta?: SchemaMetadata<any>;
 };
+
+/**
+ * ArkTypeの推論された型からプロパティキーを抽出（文字列のみ）
+ */
+type InferredPropertyKeys<T extends Type> = Extract<keyof T['infer'], string>;
 
 /**
  * ArkTypeスキーマにメタデータを付与するヘルパー関数
@@ -41,12 +47,13 @@ type ArkTypeWithMeta<T extends Type> = T & {
  *   properties: {
  *     name: { description: 'User name', example: 'John Doe' },
  *     email: { description: 'Email address', example: 'john@example.com' }
+ *     // invalidKey: { ... } ← TypeScriptエラーになる（型安全）
  *   }
  * });
  */
 export function arkWithMeta<T extends Type>(
   arktype: T,
-  meta: SchemaMetadata,
+  meta: SchemaMetadata<InferredPropertyKeys<T>>,
 ): ArkTypeWithMeta<T> {
   (arktype as ArkTypeWithMeta<T>).__meta = meta;
   return arktype;
@@ -129,11 +136,24 @@ function normalizeNullableSchema(schema: any): any {
   }
 
   if (nonNullSchemas.length === 1) {
+    const singleSchema = nonNullSchemas[0];
+    
+    // constプロパティがある場合（enum値）
+    if (singleSchema.const !== undefined) {
+      // { anyOf: [{ const: "active" }, { const: "inactive" }, { type: "null" }] }
+      // → OpenAPI 3.0では表現できないので、anyOfのままにする
+      // ただし、nullableフラグを追加
+      return {
+        anyOf: nonNullSchemas,
+        nullable: true,
+      };
+    }
+    
     // 単一の型 + null の場合（最も一般的）
     // { anyOf: [{ type: "string" }, { type: "null" }] } 
     // → { type: "string", nullable: true }
     return {
-      ...nonNullSchemas[0],
+      ...singleSchema,
       nullable: true,
     };
   }

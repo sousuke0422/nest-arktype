@@ -84,6 +84,35 @@ const NullableSchemaDefinition = type({
 
 export class NullableDto extends createArkTypeDto(NullableSchemaDefinition) {}
 
+// テスト6: 複雑なUnion型（異なる型のユニオン）
+// NOTE: NestJS Swaggerは anyOf 形式のスキーマを正しく処理できず、
+//       循環依存エラーを引き起こすため、現時点では使用不可
+// 
+// const MixedUnionSchemaDefinition = type({
+//   value: 'string | number', // 文字列または数値
+//   'optionalUnion?': 'boolean | string', // オプショナルなユニオン
+// });
+// 
+// const MixedUnionSchema = arkWithMeta(MixedUnionSchemaDefinition, {
+//   description: 'Mixed union types test',
+//   example: {
+//     value: 'test',
+//     optionalUnion: true
+//   },
+//   properties: {
+//     value: {
+//       description: 'Can be either a string or a number',
+//       example: 'sample text'
+//     },
+//     optionalUnion: {
+//       description: 'Optional field with union type',
+//       example: false
+//     }
+//   }
+// });
+// 
+// export class MixedUnionDto extends createArkTypeDto(MixedUnionSchema) {}
+
 // テスト4: Date型の処理（HTTP経由では文字列で送られる）
 const EventSchemaDefinition = type({
   title: 'string',

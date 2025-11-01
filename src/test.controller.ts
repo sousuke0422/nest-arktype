@@ -1,6 +1,13 @@
 import { Controller, Post, Body, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { CreateUserDto, CreateProductDto, CreateEventDto, ComplexDto, NullableDto } from './test.dto';
+import { 
+  CreateUserDto, 
+  CreateProductDto, 
+  CreateEventDto, 
+  ComplexDto, 
+  NullableDto
+  // MixedUnionDto - 一旦コメントアウト（anyOf形式の制限）
+} from './test.dto';
 
 @ApiTags('test')
 @Controller('test')
@@ -39,6 +46,14 @@ export class TestController {
   testNullable(@Body() dto: NullableDto) {
     return { success: true, data: dto };
   }
+
+  // Mixed union - 一旦コメントアウト（enum + null問題の調査中）
+  // @Post('mixed-union')
+  // @ApiOperation({ summary: 'Test mixed union types (string | number)' })
+  // @ApiResponse({ status: 201, description: 'Mixed union data processed', type: MixedUnionDto })
+  // testMixedUnion(@Body() dto: MixedUnionDto) {
+  //   return { success: true, data: dto };
+  // }
 
   @Get('health')
   health() {
