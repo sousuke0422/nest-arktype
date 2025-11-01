@@ -2,13 +2,51 @@ import { type, Type } from 'arktype';
 import { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 /**
- * ArkTypeの型に任意のメタデータを付与するためのラッパー
+ * プロパティレベルのメタデータ定義
  */
-type ArkTypeWithMeta<T extends Type> = T & { __meta?: Record<string, any> };
+export interface PropertyMetadata {
+  description?: string;
+  example?: any;
+  deprecated?: boolean;
+  externalDocs?: {
+    description?: string;
+    url: string;
+  };
+}
 
+/**
+ * スキーマ全体のメタデータ定義
+ */
+export interface SchemaMetadata {
+  description?: string;
+  example?: any;
+  properties?: Record<string, PropertyMetadata>;
+}
+
+/**
+ * ArkTypeの型にメタデータを付与するための内部型
+ */
+type ArkTypeWithMeta<T extends Type> = T & { 
+  __meta?: SchemaMetadata;
+};
+
+/**
+ * ArkTypeスキーマにメタデータを付与するヘルパー関数
+ * 
+ * @example
+ * const UserSchema = type({ name: 'string', email: 'string.email' });
+ * const UserWithMeta = arkWithMeta(UserSchema, {
+ *   description: 'User creation data',
+ *   example: { name: 'John', email: 'john@example.com' },
+ *   properties: {
+ *     name: { description: 'User name', example: 'John Doe' },
+ *     email: { description: 'Email address', example: 'john@example.com' }
+ *   }
+ * });
+ */
 export function arkWithMeta<T extends Type>(
   arktype: T,
-  meta: Record<string, any>,
+  meta: SchemaMetadata,
 ): ArkTypeWithMeta<T> {
   (arktype as ArkTypeWithMeta<T>).__meta = meta;
   return arktype;
@@ -35,11 +73,8 @@ function arkTypeToApiMetadata(arktype: Type): Record<string, any> {
   // $schemaプロパティを削除
   const { $schema, ...cleanSchema } = jsonSchema;
 
-  // メタデータをマージ
+  // arkWithMetaで付与されたメタデータを取得
   const customMeta = (arktype as ArkTypeWithMeta<Type>).__meta;
-  if (customMeta) {
-    Object.assign(cleanSchema, customMeta);
-  }
 
   // OpenAPIスキーマ全体ではなく、プロパティメタデータとして返す
   // NestJSは "properties" と "required" を期待する
@@ -50,9 +85,18 @@ function arkTypeToApiMetadata(arktype: Type): Record<string, any> {
   
   for (const [key, value] of Object.entries(properties)) {
     const propSchema = normalizeNullableSchema(value as any);
+    
+    // プロパティレベルのメタデータをマージ
+    const propMeta = customMeta?.properties?.[key];
+    
     metadata[key] = {
       ...propSchema,
       required: required.includes(key),
+      // description, example, deprecatedなどを追加
+      ...(propMeta?.description && { description: propMeta.description }),
+      ...(propMeta?.example !== undefined && { example: propMeta.example }),
+      ...(propMeta?.deprecated && { deprecated: propMeta.deprecated }),
+      ...(propMeta?.externalDocs && { externalDocs: propMeta.externalDocs }),
     };
   }
 

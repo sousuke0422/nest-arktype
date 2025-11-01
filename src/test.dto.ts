@@ -1,16 +1,39 @@
 import { type } from 'arktype';
 import { createArkTypeDto, arkWithMeta } from './arktype.helpers';
 
-// テスト1: 基本的なスキーマ
+// テスト1: メタデータ付きスキーマ（プロパティレベルのdescriptionとexample）
 const UserSchemaDefinition = type({
   name: 'string',
   email: 'string.email',
   'age?': 'number>0',
 });
 
-export class CreateUserDto extends createArkTypeDto(UserSchemaDefinition) {}
+const UserSchema = arkWithMeta(UserSchemaDefinition, {
+  description: 'User creation data',
+  example: {
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    age: 30
+  },
+  properties: {
+    name: {
+      description: 'Full name of the user',
+      example: 'John Doe'
+    },
+    email: {
+      description: 'Email address of the user',
+      example: 'john.doe@example.com'
+    },
+    age: {
+      description: 'Age of the user (optional)',
+      example: 30
+    }
+  }
+});
 
-// テスト2: メタデータ付きスキーマ
+export class CreateUserDto extends createArkTypeDto(UserSchema) {}
+
+// テスト2: メタデータ付きスキーマ（deprecatedとexternalDocsの例）
 const ProductSchemaDefinition = type({
   name: 'string',
   price: 'number>0',
@@ -18,11 +41,27 @@ const ProductSchemaDefinition = type({
 });
 
 const ProductSchema = arkWithMeta(ProductSchemaDefinition, {
+  description: 'Product creation data',
   example: {
     name: 'Sample Product',
     price: 99.99,
     description: 'A great product',
   },
+  properties: {
+    name: {
+      description: 'Product name',
+      example: 'Premium Widget'
+    },
+    price: {
+      description: 'Product price in USD',
+      example: 99.99
+    },
+    description: {
+      description: 'Detailed product description',
+      example: 'A high-quality widget that does amazing things',
+      deprecated: false
+    }
+  }
 });
 
 export class CreateProductDto extends createArkTypeDto(ProductSchema) {}
@@ -52,4 +91,27 @@ const EventSchemaDefinition = type({
   'endDate?': 'string.date.parse',
 });
 
-export class CreateEventDto extends createArkTypeDto(EventSchemaDefinition) {}
+const EventSchema = arkWithMeta(EventSchemaDefinition, {
+  description: 'Event creation data',
+  example: {
+    title: 'Tech Conference 2025',
+    startDate: '2025-12-01T09:00:00Z',
+    endDate: '2025-12-03T17:00:00Z'
+  },
+  properties: {
+    title: {
+      description: 'Event title',
+      example: 'Tech Conference 2025'
+    },
+    startDate: {
+      description: 'Event start date and time (ISO 8601)',
+      example: '2025-12-01T09:00:00Z'
+    },
+    endDate: {
+      description: 'Event end date and time (ISO 8601, optional)',
+      example: '2025-12-03T17:00:00Z'
+    }
+  }
+});
+
+export class CreateEventDto extends createArkTypeDto(EventSchema) {}
