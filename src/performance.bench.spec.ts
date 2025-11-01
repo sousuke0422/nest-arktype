@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { type } from 'arktype';
 import { createArkTypeDto, arkWithMeta } from './arktype.helpers';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
+import { IsString, IsEmail, IsNumber, IsOptional, Min } from 'class-validator';
+import { z } from 'zod';
 
 // class-validatorとの比較用のDTO
-import { IsString, IsEmail, IsNumber, IsOptional, Min } from 'class-validator';
-
 class ClassValidatorUserDto {
   @IsString()
   name: string;
@@ -19,6 +19,13 @@ class ClassValidatorUserDto {
   @Min(1)
   age?: number;
 }
+
+// Zodスキーマ
+const ZodUserSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  age: z.number().positive().optional(),
+});
 
 // ArkType版のDTO
 const ArkTypeUserSchema = type({
@@ -54,7 +61,8 @@ describe('Performance Benchmarks', () => {
       const end = performance.now();
 
       expect(result instanceof type.errors).toBe(false);
-      console.log(`ArkType (valid): ${(end - start).toFixed(4)}ms`);
+      const elapsed = end - start;
+      console.log(`\n[ArkType] Valid object: ${elapsed.toFixed(4)}ms`);
     });
 
     it('ArkType: single invalid object validation', () => {
@@ -63,7 +71,28 @@ describe('Performance Benchmarks', () => {
       const end = performance.now();
 
       expect(result instanceof type.errors).toBe(true);
-      console.log(`ArkType (invalid): ${(end - start).toFixed(4)}ms`);
+      const elapsed = end - start;
+      console.log(`[ArkType] Invalid object: ${elapsed.toFixed(4)}ms`);
+    });
+
+    it('Zod: single valid object validation', () => {
+      const start = performance.now();
+      const result = ZodUserSchema.safeParse(validData);
+      const end = performance.now();
+
+      expect(result.success).toBe(true);
+      const elapsed = end - start;
+      console.log(`[Zod] Valid object: ${elapsed.toFixed(4)}ms`);
+    });
+
+    it('Zod: single invalid object validation', () => {
+      const start = performance.now();
+      const result = ZodUserSchema.safeParse(invalidData);
+      const end = performance.now();
+
+      expect(result.success).toBe(false);
+      const elapsed = end - start;
+      console.log(`[Zod] Invalid object: ${elapsed.toFixed(4)}ms`);
     });
 
     it('class-validator: single valid object validation', async () => {
@@ -73,7 +102,8 @@ describe('Performance Benchmarks', () => {
       const end = performance.now();
 
       expect(errors.length).toBe(0);
-      console.log(`class-validator (valid): ${(end - start).toFixed(4)}ms`);
+      const elapsed = end - start;
+      console.log(`[class-validator] Valid object: ${elapsed.toFixed(4)}ms`);
     });
 
     it('class-validator: single invalid object validation', async () => {
@@ -83,7 +113,8 @@ describe('Performance Benchmarks', () => {
       const end = performance.now();
 
       expect(errors.length).toBeGreaterThan(0);
-      console.log(`class-validator (invalid): ${(end - start).toFixed(4)}ms`);
+      const elapsed = end - start;
+      console.log(`[class-validator] Invalid object: ${elapsed.toFixed(4)}ms`);
     });
   });
 
@@ -95,8 +126,23 @@ describe('Performance Benchmarks', () => {
 
       const validCount = results.filter(r => !(r instanceof type.errors)).length;
       expect(validCount).toBe(1000);
-      console.log(`ArkType (1000 objects): ${(end - start).toFixed(2)}ms`);
-      console.log(`  Average: ${((end - start) / 1000).toFixed(4)}ms per object`);
+      const elapsed = end - start;
+      console.log(`\n[ArkType] 1000 objects: ${elapsed.toFixed(2)}ms`);
+      console.log(`  Average: ${(elapsed / 1000).toFixed(4)}ms per object`);
+      console.log(`  Throughput: ${Math.round(1000 / (elapsed / 1000))} validations/sec`);
+    });
+
+    it('Zod: 1000 objects validation', () => {
+      const start = performance.now();
+      const results = largeDataset.map(data => ZodUserSchema.safeParse(data));
+      const end = performance.now();
+
+      const validCount = results.filter(r => r.success).length;
+      expect(validCount).toBe(1000);
+      const elapsed = end - start;
+      console.log(`\n[Zod] 1000 objects: ${elapsed.toFixed(2)}ms`);
+      console.log(`  Average: ${(elapsed / 1000).toFixed(4)}ms per object`);
+      console.log(`  Throughput: ${Math.round(1000 / (elapsed / 1000))} validations/sec`);
     });
 
     it('class-validator: 1000 objects validation', async () => {
@@ -110,8 +156,10 @@ describe('Performance Benchmarks', () => {
 
       const validCount = results.filter(errors => errors.length === 0).length;
       expect(validCount).toBe(1000);
-      console.log(`class-validator (1000 objects): ${(end - start).toFixed(2)}ms`);
-      console.log(`  Average: ${((end - start) / 1000).toFixed(4)}ms per object`);
+      const elapsed = end - start;
+      console.log(`\n[class-validator] 1000 objects: ${elapsed.toFixed(2)}ms`);
+      console.log(`  Average: ${(elapsed / 1000).toFixed(4)}ms per object`);
+      console.log(`  Throughput: ${Math.round(1000 / (elapsed / 1000))} validations/sec`);
     });
   });
 
