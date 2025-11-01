@@ -5,6 +5,7 @@ import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { IsString, IsEmail, IsNumber, IsOptional, Min } from 'class-validator';
 import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
 // class-validatorとの比較用のDTO
 class ClassValidatorUserDto {
@@ -26,6 +27,9 @@ const ZodUserSchema = z.object({
   email: z.string().email(),
   age: z.number().positive().optional(),
 });
+
+// nestjs-zod DTO
+class NestJsZodUserDto extends createZodDto(ZodUserSchema) {}
 
 // ArkType版のDTO
 const ArkTypeUserSchema = type({
@@ -145,6 +149,19 @@ describe('Performance Benchmarks', () => {
       console.log(`  Throughput: ${Math.round(1000 / (elapsed / 1000))} validations/sec`);
     });
 
+    it('nestjs-zod: 1000 objects validation', () => {
+      const start = performance.now();
+      const results = largeDataset.map(data => ZodUserSchema.safeParse(data));
+      const end = performance.now();
+
+      const validCount = results.filter(r => r.success).length;
+      expect(validCount).toBe(1000);
+      const elapsed = end - start;
+      console.log(`\n[nestjs-zod (Zod)] 1000 objects: ${elapsed.toFixed(2)}ms`);
+      console.log(`  Average: ${(elapsed / 1000).toFixed(4)}ms per object`);
+      console.log(`  Throughput: ${Math.round(1000 / (elapsed / 1000))} validations/sec`);
+    });
+
     it('class-validator: 1000 objects validation', async () => {
       const start = performance.now();
       const validationPromises = largeDataset.map(async data => {
@@ -175,8 +192,25 @@ describe('Performance Benchmarks', () => {
       }
       const end = performance.now();
 
-      console.log(`ArkType schema creation (100x): ${(end - start).toFixed(2)}ms`);
-      console.log(`  Average: ${((end - start) / 100).toFixed(4)}ms per schema`);
+      const elapsed = end - start;
+      console.log(`\n[ArkType] Schema creation (100x): ${elapsed.toFixed(2)}ms`);
+      console.log(`  Average: ${(elapsed / 100).toFixed(4)}ms per schema`);
+    });
+
+    it('Zod: schema creation', () => {
+      const start = performance.now();
+      for (let i = 0; i < 100; i++) {
+        z.object({
+          name: z.string(),
+          email: z.string().email(),
+          age: z.number().positive().optional(),
+        });
+      }
+      const end = performance.now();
+
+      const elapsed = end - start;
+      console.log(`\n[Zod] Schema creation (100x): ${elapsed.toFixed(2)}ms`);
+      console.log(`  Average: ${(elapsed / 100).toFixed(4)}ms per schema`);
     });
 
     it('ArkType: DTO class creation', () => {
@@ -192,8 +226,27 @@ describe('Performance Benchmarks', () => {
       }
       const end = performance.now();
 
-      console.log(`ArkType DTO creation (100x): ${(end - start).toFixed(2)}ms`);
-      console.log(`  Average: ${((end - start) / 100).toFixed(4)}ms per DTO`);
+      const elapsed = end - start;
+      console.log(`\n[ArkType] DTO creation (100x): ${elapsed.toFixed(2)}ms`);
+      console.log(`  Average: ${(elapsed / 100).toFixed(4)}ms per DTO`);
+    });
+
+    it('nestjs-zod: DTO class creation', () => {
+      const schema = z.object({
+        name: z.string(),
+        email: z.string().email(),
+        age: z.number().positive().optional(),
+      });
+
+      const start = performance.now();
+      for (let i = 0; i < 100; i++) {
+        createZodDto(schema);
+      }
+      const end = performance.now();
+
+      const elapsed = end - start;
+      console.log(`\n[nestjs-zod] DTO creation (100x): ${elapsed.toFixed(2)}ms`);
+      console.log(`  Average: ${(elapsed / 100).toFixed(4)}ms per DTO`);
     });
   });
 
