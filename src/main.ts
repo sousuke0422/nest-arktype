@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ArkTypeValidationPipe } from './arktype-validation.pipe';
+import { applySchemaMetadata, collectDtoClasses } from './schema-metadata.helper';
+import * as dtos from './test.dto';
 import * as fs from 'fs';
 
 async function bootstrap() {
@@ -17,7 +19,11 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  let document = SwaggerModule.createDocument(app, config);
+  
+  // スキーマレベルのメタデータ（example, description）を適用
+  const dtoClasses = collectDtoClasses(dtos);
+  document = applySchemaMetadata(document, dtoClasses);
   
   // 生成されたOpenAPIドキュメントをファイルに保存して検証
   fs.writeFileSync(
