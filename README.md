@@ -1,4 +1,4 @@
-# ArkType + NestJS Integration
+# nestjs-arktype
 
 **完成度**: 100% ✅  
 **ステータス**: Production Ready 🚀
@@ -9,7 +9,7 @@ TypeScript型安全なバリデーションとOpenAPI統合を提供する、Ark
 
 ## 🎯 プロジェクト概要
 
-このプロジェクトは、[ArkType](https://arktype.io/)をNestJSに統合し、**型安全**で**高速**なバリデーションとSwagger/OpenAPIドキュメント生成を実現します。
+**nestjs-arktype**は、[ArkType](https://arktype.io/)をNestJSに統合し、**型安全**で**高速**なバリデーションとSwagger/OpenAPIドキュメント生成を実現します。
 
 ### 主な特徴
 
@@ -31,14 +31,14 @@ TypeScript型安全なバリデーションとOpenAPI統合を提供する、Ark
 
 | ライブラリ | 単一バリデーション | 1000件バリデーション | スループット | 型安全性 | OpenAPI統合 |
 |-----------|----------------|------------------|------------|---------|-----------|
-| **ArkType (本プロジェクト)** | **0.12ms** | **0.47ms** | **2,105,706/sec** | ✅ 完全 | ✅ 統合 |
+| **nestjs-arktype** | **0.12ms** | **0.47ms** | **2,105,706/sec** | ✅ 完全 | ✅ 統合 |
 | nestjs-zod | 1.01ms | 1.55ms | 645,203/sec | ✅ 完全 | ✅ 統合 |
 | Zod | 1.01ms | 2.04ms | 489,428/sec | ✅ 完全 | ⚠️ 要nestjs-zod |
 | class-validator | 2.08ms | 18.01ms | 55,519/sec | ⚠️ 部分的 | ✅ 統合 |
 
 **注**: 
-- ArkTypeは**class-validatorの38倍、Zodの4.3倍、nestjs-zodの3.3倍高速**（実測値）
-- ArkTypeは同期実行で最高のパフォーマンスを実現
+- nestjs-arktypeは**class-validatorの38倍、Zodの4.3倍、nestjs-zodの3.3倍高速**（実測値）
+- nestjs-arktypeは同期実行で最高のパフォーマンスを実現
 - 複雑なスキーマ（8フィールド、email/enum/array/nullable含む）での測定結果
 
 ### 詳細なベンチマーク
@@ -77,8 +77,8 @@ const ComplexSchema = type({
 
 ### vs class-validator
 
-| 特徴 | ArkType | class-validator |
-|------|---------|----------------|
+| 特徴 | nestjs-arktype | class-validator |
+|------|----------------|----------------|
 | **パフォーマンス** | **38倍高速** | ベースライン |
 | **型安全性** | **完全** | 部分的 |
 | **スキーマ定義** | **簡潔** (文字列) | 冗長（デコレータ） |
@@ -87,8 +87,8 @@ const ComplexSchema = type({
 
 ### vs Zod / nestjs-zod
 
-| 特徴 | ArkType | Zod | nestjs-zod |
-|------|---------|-----|-----------|
+| 特徴 | nestjs-arktype | Zod | nestjs-zod |
+|------|----------------|-----|-----------|
 | **パフォーマンス** | **4.3倍高速** | 中程度 | **3.3倍遅い** |
 | **スキーマ定義** | **最も簡潔** | チェーン | チェーン |
 | **型推論** | **ネイティブ** | Zod | Zod |
@@ -102,37 +102,37 @@ const ComplexSchema = type({
 ```
 各リクエストで3つのバリデーション実行
 
-ArkType:         0.0015ms/request  (CPU: <0.01%)
-nestjs-zod:      0.0046ms/request  (CPU: <0.05%)
-Zod:             0.0061ms/request  (CPU: <0.05%)
+nestjs-arktype: 0.0015ms/request  (CPU: <0.01%)
+nestjs-zod:     0.0046ms/request  (CPU: <0.05%)
+Zod:            0.0061ms/request  (CPU: <0.05%)
 class-validator: 0.0540ms/request  (CPU: <0.5%)
 ```
 
-**結論**: ArkTypeは**3-36倍高速**で、高トラフィックAPIに最適
+**結論**: nestjs-arktypeは**3-36倍高速**で、高トラフィックAPIに最適
 
 #### シナリオ2: バッチ処理（10,000件）
 
 ```
-ArkType:         ~4.7ms     (同期実行)
+nestjs-arktype:  ~4.7ms     (同期実行)
 nestjs-zod:      ~15.5ms    (3.3倍遅い)
 Zod:             ~20.4ms    (4.3倍遅い)
 class-validator: ~180.1ms   (38倍遅い)
 ```
 
-**結論**: ArkTypeは**圧倒的に高速**で、バッチ処理に最適
+**結論**: nestjs-arktypeは**圧倒的に高速**で、バッチ処理に最適
 
 #### シナリオ3: サーバーレス/コールドスタート
 
 ```
 スキーマ作成コスト（10スキーマ + 10DTO）:
 
-ArkType:        ~0.81ms  (0.61 + 0.19)
+nestjs-arktype: ~0.81ms  (0.61 + 0.19)
 nestjs-zod:     ~1.44ms  (1.18 + 0.26)
 Zod:            ~1.18ms  (schema only)
 class-validator: ~2-3ms   (デコレータ処理)
 ```
 
-**結論**: ArkTypeは**起動が最速**で、サーバーレスに最適
+**結論**: nestjs-arktypeは**起動が最速**で、サーバーレスに最適
 
 ---
 
