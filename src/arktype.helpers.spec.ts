@@ -5,36 +5,36 @@ import { createArkTypeDto, arkWithMeta } from './arktype.helpers';
 describe('ArkType Helpers', () => {
   describe('createArkTypeDto', () => {
     it('should create a DTO class with static schema property', () => {
-      const UserSchema = type({
+      const BasicUserSchema = type({
         name: 'string',
         email: 'string.email',
       });
 
-      const UserDto = createArkTypeDto(UserSchema);
+      const BasicUserDto = createArkTypeDto(BasicUserSchema);
 
-      expect(UserDto.schema).toBe(UserSchema);
+      expect(BasicUserDto.schema).toBe(BasicUserSchema);
     });
 
     it('should have _OPENAPI_METADATA_FACTORY method', () => {
-      const UserSchema = type({
+      const MetadataSchema = type({
         name: 'string',
         age: 'number',
       });
 
-      const UserDto = createArkTypeDto(UserSchema);
+      const MetadataDto = createArkTypeDto(MetadataSchema);
 
-      expect(UserDto._OPENAPI_METADATA_FACTORY).toBeDefined();
-      expect(typeof UserDto._OPENAPI_METADATA_FACTORY).toBe('function');
+      expect(MetadataDto._OPENAPI_METADATA_FACTORY).toBeDefined();
+      expect(typeof MetadataDto._OPENAPI_METADATA_FACTORY).toBe('function');
     });
 
     it('should generate property metadata correctly', () => {
-      const UserSchema = type({
+      const PropertySchema = type({
         name: 'string',
         'age?': 'number>0',
       });
 
-      const UserDto = createArkTypeDto(UserSchema);
-      const metadata = UserDto._OPENAPI_METADATA_FACTORY();
+      const PropertyDto = createArkTypeDto(PropertySchema);
+      const metadata = PropertyDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.name).toBeDefined();
       expect(metadata.name.type).toBe('string');
@@ -49,12 +49,12 @@ describe('ArkType Helpers', () => {
 
   describe('arkWithMeta', () => {
     it('should attach metadata to ArkType schema', () => {
-      const UserSchema = type({
+      const AttachMetaSchema = type({
         name: 'string',
         email: 'string.email',
       });
 
-      const UserWithMeta = arkWithMeta(UserSchema, {
+      const AttachMetaWithMeta = arkWithMeta(AttachMetaSchema, {
         description: 'User data',
         example: { name: 'John', email: 'john@example.com' },
         properties: {
@@ -63,7 +63,7 @@ describe('ArkType Helpers', () => {
         },
       });
 
-      const meta = (UserWithMeta as any).__meta;
+      const meta = (AttachMetaWithMeta as any).__meta;
       expect(meta).toBeDefined();
       expect(meta.description).toBe('User data');
       expect(meta.example).toEqual({ name: 'John', email: 'john@example.com' });
@@ -71,13 +71,13 @@ describe('ArkType Helpers', () => {
     });
 
     it('should enforce type-safe property keys', () => {
-      const UserSchema = type({
+      const TypeSafeSchema = type({
         name: 'string',
         email: 'string.email',
       });
 
       // This should compile without errors
-      arkWithMeta(UserSchema, {
+      arkWithMeta(TypeSafeSchema, {
         properties: {
           name: { description: 'Name' },
           email: { description: 'Email' },
@@ -85,7 +85,7 @@ describe('ArkType Helpers', () => {
       });
 
       // This should cause a TypeScript error if uncommented:
-      // arkWithMeta(UserSchema, {
+      // arkWithMeta(TypeSafeSchema, {
       //   properties: {
       //     invalidKey: { description: 'Invalid' },
       //   },
@@ -93,20 +93,20 @@ describe('ArkType Helpers', () => {
     });
 
     it('should include property metadata in _OPENAPI_METADATA_FACTORY output', () => {
-      const UserSchema = type({
+      const IncludeMetaSchema = type({
         name: 'string',
         email: 'string.email',
       });
 
-      const UserWithMeta = arkWithMeta(UserSchema, {
+      const IncludeMetaWithMeta = arkWithMeta(IncludeMetaSchema, {
         properties: {
           name: { description: 'Full name', example: 'John Doe' },
           email: { description: 'Email address', example: 'john@example.com' },
         },
       });
 
-      const UserDto = createArkTypeDto(UserWithMeta);
-      const metadata = UserDto._OPENAPI_METADATA_FACTORY();
+      const IncludeMetaDto = createArkTypeDto(IncludeMetaWithMeta);
+      const metadata = IncludeMetaDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.name.description).toBe('Full name');
       expect(metadata.name.example).toBe('John Doe');
@@ -117,24 +117,24 @@ describe('ArkType Helpers', () => {
 
   describe('Nullable types', () => {
     it('should handle string | null correctly', () => {
-      const Schema = type({
+      const NullableStringSchema = type({
         value: 'string | null',
       });
 
-      const Dto = createArkTypeDto(Schema);
-      const metadata = Dto._OPENAPI_METADATA_FACTORY();
+      const NullableStringDto = createArkTypeDto(NullableStringSchema);
+      const metadata = NullableStringDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.value.type).toBe('string');
       expect(metadata.value.nullable).toBe(true);
     });
 
     it('should handle optional nullable fields', () => {
-      const Schema = type({
+      const OptionalNullableSchema = type({
         'value?': 'string | null',
       });
 
-      const Dto = createArkTypeDto(Schema);
-      const metadata = Dto._OPENAPI_METADATA_FACTORY();
+      const OptionalNullableDto = createArkTypeDto(OptionalNullableSchema);
+      const metadata = OptionalNullableDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.value.type).toBe('string');
       expect(metadata.value.nullable).toBe(true);
@@ -144,12 +144,12 @@ describe('ArkType Helpers', () => {
 
   describe('Date types', () => {
     it('should handle string.date.parse correctly', () => {
-      const Schema = type({
+      const DateParseSchema = type({
         createdAt: 'string.date.parse',
       });
 
-      const Dto = createArkTypeDto(Schema);
-      const metadata = Dto._OPENAPI_METADATA_FACTORY();
+      const DateParseDto = createArkTypeDto(DateParseSchema);
+      const metadata = DateParseDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.createdAt.type).toBe('string');
       // Date型はfallbackでformat: 'date-time'に変換されるはず
@@ -159,12 +159,12 @@ describe('ArkType Helpers', () => {
 
   describe('Array types', () => {
     it('should handle string[] correctly', () => {
-      const Schema = type({
+      const ArraySchema = type({
         tags: 'string[]',
       });
 
-      const Dto = createArkTypeDto(Schema);
-      const metadata = Dto._OPENAPI_METADATA_FACTORY();
+      const ArrayDto = createArkTypeDto(ArraySchema);
+      const metadata = ArrayDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.tags.type).toBe('array');
       expect(metadata.tags.items).toBeDefined();
@@ -174,12 +174,12 @@ describe('ArkType Helpers', () => {
 
   describe('Enum types', () => {
     it('should handle string literal union as enum', () => {
-      const Schema = type({
+      const EnumSchema = type({
         status: "'active' | 'inactive' | 'pending'",
       });
 
-      const Dto = createArkTypeDto(Schema);
-      const metadata = Dto._OPENAPI_METADATA_FACTORY();
+      const EnumDto = createArkTypeDto(EnumSchema);
+      const metadata = EnumDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.status.enum).toBeDefined();
       expect(metadata.status.enum).toEqual(['active', 'inactive', 'pending']);
@@ -188,24 +188,24 @@ describe('ArkType Helpers', () => {
 
   describe('Number constraints', () => {
     it('should handle number>0 correctly', () => {
-      const Schema = type({
+      const GreaterThanSchema = type({
         age: 'number>0',
       });
 
-      const Dto = createArkTypeDto(Schema);
-      const metadata = Dto._OPENAPI_METADATA_FACTORY();
+      const GreaterThanDto = createArkTypeDto(GreaterThanSchema);
+      const metadata = GreaterThanDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.age.type).toBe('number');
       expect(metadata.age.exclusiveMinimum).toBe(0);
     });
 
     it('should handle number>=0 correctly', () => {
-      const Schema = type({
+      const GreaterEqualSchema = type({
         count: 'number>=0',
       });
 
-      const Dto = createArkTypeDto(Schema);
-      const metadata = Dto._OPENAPI_METADATA_FACTORY();
+      const GreaterEqualDto = createArkTypeDto(GreaterEqualSchema);
+      const metadata = GreaterEqualDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.count.type).toBe('number');
       expect(metadata.count.minimum).toBe(0);
@@ -214,12 +214,12 @@ describe('ArkType Helpers', () => {
 
   describe('Email validation', () => {
     it('should handle string.email correctly', () => {
-      const Schema = type({
+      const EmailSchema = type({
         email: 'string.email',
       });
 
-      const Dto = createArkTypeDto(Schema);
-      const metadata = Dto._OPENAPI_METADATA_FACTORY();
+      const EmailDto = createArkTypeDto(EmailSchema);
+      const metadata = EmailDto._OPENAPI_METADATA_FACTORY();
 
       expect(metadata.email.type).toBe('string');
       expect(metadata.email.format).toBe('email');

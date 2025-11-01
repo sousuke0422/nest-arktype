@@ -6,8 +6,8 @@ export default defineConfig({
     root: './',
     environment: 'node',
     include: ['src/**/*.spec.ts', 'test/**/*.spec.ts'],
-    // Run tests sequentially to avoid state sharing issues
-    fileParallelism: false,
+    // Enable parallel execution for better performance
+    // Each test now uses unique class names to avoid conflicts
   },
   plugins: [
     swc.vite({

@@ -6,39 +6,40 @@ import { createArkTypeDto, arkWithMeta } from './arktype.helpers';
 describe('Schema Metadata Helper', () => {
   describe('collectDtoClasses', () => {
     it('should collect DTO classes with ArkType schemas', () => {
-      const UserSchema = type({ name: 'string' });
-      const ProductSchema = type({ title: 'string' });
+      // Use unique schema definitions per test to avoid state sharing
+      const UserSchemaForCollection = type({ username: 'string' });
+      const ProductSchemaForCollection = type({ productTitle: 'string' });
 
-      class UserDto extends createArkTypeDto(UserSchema) {}
-      class ProductDto extends createArkTypeDto(ProductSchema) {}
+      class UserDtoForCollection extends createArkTypeDto(UserSchemaForCollection) {}
+      class ProductDtoForCollection extends createArkTypeDto(ProductSchemaForCollection) {}
 
       const dtoModule = {
-        UserDto,
-        ProductDto,
+        UserDtoForCollection,
+        ProductDtoForCollection,
         SomeOtherExport: 'not a class',
       };
 
       const result = collectDtoClasses(dtoModule);
 
       expect(result).toHaveLength(2);
-      expect(result).toContain(UserDto);
-      expect(result).toContain(ProductDto);
+      expect(result).toContain(UserDtoForCollection);
+      expect(result).toContain(ProductDtoForCollection);
     });
 
     it('should skip classes without ArkType schemas', () => {
-      const UserSchema = type({ name: 'string' });
-      class UserDto extends createArkTypeDto(UserSchema) {}
+      const UserSchemaForSkip = type({ userName: 'string' });
+      class UserDtoForSkip extends createArkTypeDto(UserSchemaForSkip) {}
       class RegularClass {}
 
       const dtoModule = {
-        UserDto,
+        UserDtoForSkip,
         RegularClass,
       };
 
       const result = collectDtoClasses(dtoModule);
 
       expect(result).toHaveLength(1);
-      expect(result).toContain(UserDto);
+      expect(result).toContain(UserDtoForSkip);
       expect(result).not.toContain(RegularClass);
     });
 
@@ -50,93 +51,93 @@ describe('Schema Metadata Helper', () => {
 
   describe('applySchemaMetadata', () => {
     it('should add schema-level example to OpenAPI document', () => {
-      const UserSchema = arkWithMeta(
-        type({ name: 'string', email: 'string' }),
+      const SchemaWithExample = arkWithMeta(
+        type({ fullName: 'string', emailAddr: 'string' }),
         {
-          example: { name: 'John', email: 'john@example.com' },
+          example: { fullName: 'John', emailAddr: 'john@example.com' },
         }
       );
 
-      class UserDto extends createArkTypeDto(UserSchema) {}
+      class DtoWithExample extends createArkTypeDto(SchemaWithExample) {}
 
       const document = {
         components: {
           schemas: {
-            UserDto: {
+            DtoWithExample: {
               type: 'object',
               properties: {
-                name: { type: 'string' },
-                email: { type: 'string' },
+                fullName: { type: 'string' },
+                emailAddr: { type: 'string' },
               },
             },
           },
         },
       };
 
-      const result = applySchemaMetadata(document, [UserDto]);
+      const result = applySchemaMetadata(document, [DtoWithExample]);
 
-      expect(result.components.schemas.UserDto.example).toEqual({
-        name: 'John',
-        email: 'john@example.com',
+      expect(result.components.schemas.DtoWithExample.example).toEqual({
+        fullName: 'John',
+        emailAddr: 'john@example.com',
       });
     });
 
     it('should add schema-level description to OpenAPI document', () => {
-      const UserSchema = arkWithMeta(
-        type({ name: 'string' }),
+      const SchemaWithDesc = arkWithMeta(
+        type({ personName: 'string' }),
         {
           description: 'User creation data',
         }
       );
 
-      class UserDto extends createArkTypeDto(UserSchema) {}
+      class DtoWithDesc extends createArkTypeDto(SchemaWithDesc) {}
 
       const document = {
         components: {
           schemas: {
-            UserDto: {
+            DtoWithDesc: {
               type: 'object',
               properties: {
-                name: { type: 'string' },
+                personName: { type: 'string' },
               },
             },
           },
         },
       };
 
-      const result = applySchemaMetadata(document, [UserDto]);
+      const result = applySchemaMetadata(document, [DtoWithDesc]);
 
-      expect(result.components.schemas.UserDto.description).toBe('User creation data');
+      expect(result.components.schemas.DtoWithDesc.description).toBe('User creation data');
     });
 
     it('should add both example and description', () => {
-      const UserSchema = arkWithMeta(
-        type({ name: 'string' }),
+      const SchemaWithBoth = arkWithMeta(
+        type({ identifier: 'string' }),
         {
           description: 'User data',
-          example: { name: 'John' },
+          example: { identifier: 'John' },
         }
       );
 
-      class UserDto extends createArkTypeDto(UserSchema) {}
+      class DtoWithBoth extends createArkTypeDto(SchemaWithBoth) {}
 
       const document = {
         components: {
           schemas: {
-            UserDto: {
+            DtoWithBoth: {
               type: 'object',
               properties: {
-                name: { type: 'string' },
+                identifier: { type: 'string' },
               },
             },
           },
         },
       };
 
-      const result = applySchemaMetadata(document, [UserDto]);
+      const result = applySchemaMetadata(document, [DtoWithBoth]);
 
-      expect(result.components.schemas.UserDto.description).toBe('User data');
-      expect(result.components.schemas.UserDto.example).toEqual({ name: 'John' });
+      expect(result.components.schemas.DtoWithBoth.description).toBe('User data');
+      expect(result.components.schemas.DtoWithBoth.example).toEqual({ identifier: 'John' });
     });
 
     it('should not add metadata if DTO has no custom metadata', () => {
@@ -172,57 +173,57 @@ describe('Schema Metadata Helper', () => {
     });
 
     it('should handle multiple DTOs', () => {
-      const UserSchema = arkWithMeta(
-        type({ name: 'string' }),
+      const FirstSchema = arkWithMeta(
+        type({ firstName: 'string' }),
         {
-          description: 'User data',
-          example: { name: 'John' },
+          description: 'First data',
+          example: { firstName: 'John' },
         }
       );
 
-      const ProductSchema = arkWithMeta(
-        type({ title: 'string' }),
+      const SecondSchema = arkWithMeta(
+        type({ secondTitle: 'string' }),
         {
-          description: 'Product data',
-          example: { title: 'Widget' },
+          description: 'Second data',
+          example: { secondTitle: 'Widget' },
         }
       );
 
-      class UserDto extends createArkTypeDto(UserSchema) {}
-      class ProductDto extends createArkTypeDto(ProductSchema) {}
+      class FirstDto extends createArkTypeDto(FirstSchema) {}
+      class SecondDto extends createArkTypeDto(SecondSchema) {}
 
       const document = {
         components: {
           schemas: {
-            UserDto: {
+            FirstDto: {
               type: 'object',
-              properties: { name: { type: 'string' } },
+              properties: { firstName: { type: 'string' } },
             },
-            ProductDto: {
+            SecondDto: {
               type: 'object',
-              properties: { title: { type: 'string' } },
+              properties: { secondTitle: { type: 'string' } },
             },
           },
         },
       };
 
-      const result = applySchemaMetadata(document, [UserDto, ProductDto]);
+      const result = applySchemaMetadata(document, [FirstDto, SecondDto]);
 
-      expect(result.components.schemas.UserDto.description).toBe('User data');
-      expect(result.components.schemas.UserDto.example).toEqual({ name: 'John' });
-      expect(result.components.schemas.ProductDto.description).toBe('Product data');
-      expect(result.components.schemas.ProductDto.example).toEqual({ title: 'Widget' });
+      expect(result.components.schemas.FirstDto.description).toBe('First data');
+      expect(result.components.schemas.FirstDto.example).toEqual({ firstName: 'John' });
+      expect(result.components.schemas.SecondDto.description).toBe('Second data');
+      expect(result.components.schemas.SecondDto.example).toEqual({ secondTitle: 'Widget' });
     });
 
     it('should handle missing schemas gracefully', () => {
-      const UserSchema = arkWithMeta(
-        type({ name: 'string' }),
+      const MissingSchema = arkWithMeta(
+        type({ missingField: 'string' }),
         {
-          description: 'User data',
+          description: 'Missing data',
         }
       );
 
-      class UserDto extends createArkTypeDto(UserSchema) {}
+      class MissingDto extends createArkTypeDto(MissingSchema) {}
 
       const document = {
         components: {
@@ -231,23 +232,23 @@ describe('Schema Metadata Helper', () => {
       };
 
       // Should not throw
-      expect(() => applySchemaMetadata(document, [UserDto])).not.toThrow();
+      expect(() => applySchemaMetadata(document, [MissingDto])).not.toThrow();
     });
 
     it('should handle document without components', () => {
-      const UserSchema = arkWithMeta(
-        type({ name: 'string' }),
+      const NoComponentSchema = arkWithMeta(
+        type({ field: 'string' }),
         {
-          description: 'User data',
+          description: 'No component data',
         }
       );
 
-      class UserDto extends createArkTypeDto(UserSchema) {}
+      class NoComponentDto extends createArkTypeDto(NoComponentSchema) {}
 
       const document = {};
 
       // Should not throw
-      expect(() => applySchemaMetadata(document, [UserDto])).not.toThrow();
+      expect(() => applySchemaMetadata(document, [NoComponentDto])).not.toThrow();
     });
   });
 });
