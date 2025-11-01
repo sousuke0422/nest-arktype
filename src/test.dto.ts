@@ -37,11 +37,11 @@ const ComplexSchemaDefinition = type({
 
 export class ComplexDto extends createArkTypeDto(ComplexSchemaDefinition) {}
 
-// テスト4: Date型の処理
+// テスト4: Date型の処理（HTTP経由では文字列で送られる）
 const EventSchemaDefinition = type({
   title: 'string',
-  startDate: 'Date',
-  'endDate?': 'Date',
+  startDate: 'string.date.parse', // ISO 8601文字列をDateに変換
+  'endDate?': 'string.date.parse',
 });
 
 export class CreateEventDto extends createArkTypeDto(EventSchemaDefinition) {}
