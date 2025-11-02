@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+
 import { type, Type } from 'arktype';
 import { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
