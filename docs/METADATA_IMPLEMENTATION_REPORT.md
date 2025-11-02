@@ -1,7 +1,7 @@
 # OpenAPIメタデータ完全サポート実装報告書
 
 **実装日時**: 2025-11-02  
-**実装者**: Gemini AI  
+**実装者**: Claude Sonnet 4.5 (via GitHub Copilot)  
 **実装アプローチ**: 外部マッピング（重複なし）
 
 ---

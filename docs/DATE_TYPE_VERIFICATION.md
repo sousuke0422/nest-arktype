@@ -286,6 +286,6 @@ const ApiSchema = type({
 
 ---
 
-**検証者**: Gemini AI  
+**検証者**: Claude Sonnet 4.5 (via GitHub Copilot)  
 **Git履歴**: `git log --oneline` で確認可能  
 **ロールバック**: `git checkout 05ae2d3` でDate型テスト前の状態に戻せる

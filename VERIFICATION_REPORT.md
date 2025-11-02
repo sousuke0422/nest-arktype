@@ -455,5 +455,5 @@ Object.defineProperty(ArkTypeDto, 'schema', {
 
 ---
 
-**検証者**: Gemini AI  
+**検証者**: Claude Sonnet 4.5 (via GitHub Copilot)  
 **次のステップ**: 複雑な型のサポート強化とメタデータマージの修正

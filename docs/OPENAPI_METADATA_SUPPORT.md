@@ -264,5 +264,5 @@ const UserSchema = type({
 
 ---
 
-**検証者**: Gemini AI  
+**検証者**: Claude Sonnet 4.5 (via GitHub Copilot)  
 **ステータス**: ⚠️ 部分的サポート（改善が必要）
