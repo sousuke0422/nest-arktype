@@ -7,6 +7,10 @@ TypeScript型安全なバリデーションとOpenAPI統合を提供する、Ark
 
 ---
 
+## Work In Progress
+
+---
+
 ## 🎯 プロジェクト概要
 
 **nestjs-arktype**は、[ArkType](https://arktype.io/)をNestJSに統合し、**型安全**で**高速**なバリデーションとSwagger/OpenAPIドキュメント生成を実現します。
@@ -139,9 +143,7 @@ class-validator: ~2-3ms   (デコレータ処理)
 ## 📦 インストール
 
 ```bash
-npm install arktype
-# または
-pnpm add arktype
+pnpm add nestjs-arktype
 ```
 
 ---
@@ -340,13 +342,13 @@ const Schema = type({
 
 ```bash
 # 全テスト実行
-npm test
+pnpm test
 
 # ウォッチモード
-npm run test:watch
+pnpm test:watch
 
 # カバレッジ
-npm run test:cov
+pnpm test:cov
 ```
 
 **テスト結果**:
@@ -453,6 +455,7 @@ MPL-2.0
 - [ArkType](https://arktype.io/) - 型安全で高速なバリデーションライブラリ
 - [NestJS](https://nestjs.com/) - プログレッシブなNode.jsフレームワーク
 - [Swagger](https://swagger.io/) - APIドキュメント生成
+- [nestjs-zod](https://github.com/BenLorantfy/nestjs-zod) - `_OPENAPI_METADATA_FACTORY`パターンの実装参考
 
 ---
 

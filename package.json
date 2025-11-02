@@ -4,10 +4,10 @@
   "description": "High-performance ArkType validation integration for NestJS with native OpenAPI support",
   "main": "index.js",
   "scripts": {
-    "start": "node_modules\\.bin\\ts-node src/main.ts",
-    "test": "node_modules\\.bin\\vitest run",
-    "test:watch": "node_modules\\.bin\\vitest",
-    "test:cov": "node_modules\\.bin\\vitest run --coverage"
+    "start": "ts-node src/main.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage"
   },
   "keywords": [
     "nestjs",
