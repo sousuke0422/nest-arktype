@@ -444,7 +444,7 @@ arktype-nestjs-prototype/
 
 ## 📄 ライセンス
 
-MIT
+MPL-2.0
 
 ---
 
