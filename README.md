@@ -1,5 +1,8 @@
 # nestjs-arktype
 
+**work in progress.**
+powerd by gemini, copilot, cursor. 
+
 **完成度**: 100% ✅  
 **ステータス**: Production Ready 🚀
 
