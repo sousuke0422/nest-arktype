@@ -1,3 +1,6 @@
+packages:
+  - 'packages/*'
+
 onlyBuiltDependencies:
   - '@nestjs/core'
   - '@scarf/scarf'

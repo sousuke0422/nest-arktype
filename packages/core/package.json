@@ -1,0 +1,55 @@
+{
+  "name": "nestjs-arktype",
+  "version": "1.0.0",
+  "description": "High-performance ArkType validation integration for NestJS with native OpenAPI support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "build": "tsc",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "nestjs",
+    "arktype",
+    "validation",
+    "openapi",
+    "swagger",
+    "dto",
+    "schema",
+    "type-safety",
+    "performance"
+  ],
+  "author": "",
+  "license": "MPL-2.0",
+  "peerDependencies": {
+    "@nestjs/common": "^11.1.8",
+    "@nestjs/core": "^11.1.8",
+    "@nestjs/swagger": "^11.2.1",
+    "arktype": "^2.1.23"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.18.13",
+    "@vitest/coverage-v8": "^4.0.6",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "unplugin-swc": "^1.5.8",
+    "vitest": "^4.0.6"
+  }
+}
+

@@ -1,46 +1,20 @@
 {
-  "name": "nestjs-arktype",
+  "name": "nestjs-arktype-workspace",
   "version": "1.0.0",
-  "description": "High-performance ArkType validation integration for NestJS with native OpenAPI support",
-  "main": "index.js",
+  "description": "Monorepo for nestjs-arktype",
+  "private": true,
   "scripts": {
-    "start": "ts-node src/main.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:cov": "vitest run --coverage"
+    "test": "pnpm --filter nestjs-arktype test",
+    "test:watch": "pnpm --filter nestjs-arktype test:watch",
+    "test:cov": "pnpm --filter nestjs-arktype test:cov",
+    "build": "pnpm --filter nestjs-arktype build",
+    "start": "pnpm --filter nestjs-arktype-debug start",
+    "bench": "pnpm --filter nestjs-arktype-bench bench"
   },
   "keywords": [
     "nestjs",
     "arktype",
-    "validation",
-    "openapi",
-    "swagger",
-    "dto",
-    "schema",
-    "type-safety",
-    "performance"
+    "monorepo"
   ],
-  "author": "",
-  "license": "MPL-2.0",
-  "dependencies": {
-    "@nestjs/common": "^11.1.8",
-    "@nestjs/core": "^11.1.8",
-    "@nestjs/platform-express": "^11.1.8",
-    "@nestjs/swagger": "^11.2.1",
-    "arktype": "^2.1.23",
-    "nestjs-zod": "^5.0.1",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2",
-    "zod": "^4.1.12"
-  },
-  "devDependencies": {
-    "@types/node": "^22.18.13",
-    "@vitest/coverage-v8": "^4.0.6",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3",
-    "unplugin-swc": "^1.5.8",
-    "vitest": "^4.0.6"
-  }
+  "license": "MPL-2.0"
 }
